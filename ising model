@@ -1,0 +1,107 @@
+from qiskit import Aer
+from qiskit.aqua import QuantumInstance
+from qiskit.aqua.operators import I, X, Z
+from qiskit.aqua.algorithms import VQE
+from qiskit.aqua.components.optimizers import COBYLA
+from qiskit.circuit import QuantumCircuit, ParameterVector
+from qiskit.chemistry.components.variational_forms import UCCSD
+
+
+optimizer = COBYLA(maxiter=1000)
+backend = Aer.get_backend('qasm_simulator')
+
+hamiltonian = 0.25 * (Z ^ Z ^ I ^ I ^ I ^ I) + 0.25*(Z ^ I ^ Z ^ I ^ I ^ I) + 0.25*(I ^ I ^ Z ^ I ^ Z ^ I) + 0.25*(I ^ I ^ I ^ I ^Z ^ Z) + 0.25*(I ^ I ^ Z ^ Z ^ I ^ I) + 0.25*(I ^ Z ^ I ^ Z ^ I ^ I) + 0.25*(I ^ I^ I^ Z ^ I ^ Z)
+
+wavefunction = QuantumCircuit(6)
+params = ParameterVector('theta', length=7)
+
+wavefunction.rzz(1.1860672278575874, 0, 2)
+wavefunction.rzz(1.1860672278575874, 1, 3)
+wavefunction.rzz(-4.118349837456201, 2, 4)
+wavefunction.rzz(-4.118349837456201, 3, 5)
+wavefunction.rzz(-4.736886083142957, 0, 1)
+wavefunction.rzz(5.958573039252438, 2, 3)
+wavefunction.rzz(-3.0348566323768313, 4, 5)
+wavefunction.rx(3.668240328342496, 0)
+wavefunction.rx(3.668240328342496, 1)
+wavefunction.rx(3.668240328342496, 4)
+wavefunction.rx(3.668240328342496, 5)
+wavefunction.rx(-0.2888946051487685, 2)
+wavefunction.rx(-0.2888946051487685, 3)
+
+wavefunction.rzz(4.467304814750704, 0, 2)
+wavefunction.rzz(4.467304814750704, 1, 3)
+wavefunction.rzz(5.0376974495337, 2, 4)
+wavefunction.rzz(5.0376974495337, 3, 5)
+wavefunction.rzz(2.7985134847652566, 0, 1)
+wavefunction.rzz(-1.2743696790229582, 2, 3)
+wavefunction.rzz(-2.9927474273174943, 4, 5)
+wavefunction.rx(-2.3152014567294916, 0)
+wavefunction.rx(-2.3152014567294916, 1)
+wavefunction.rx(-2.3152014567294916, 4)
+wavefunction.rx(-2.3152014567294916, 5)
+wavefunction.rx(3.0769944391059845, 2)
+wavefunction.rx(3.0769944391059845, 3)
+
+wavefunction.rzz(-5.380593883579104, 0, 2)
+wavefunction.rzz(-5.380593883579104, 1, 3)
+wavefunction.rzz( -5.323904746454494, 2, 4)
+wavefunction.rzz( -5.323904746454494, 3, 5)
+wavefunction.rzz(-0.0015046051093064185, 0, 1)
+wavefunction.rzz(1.9551795206341267, 2, 3)
+wavefunction.rzz(0.04645827951809564, 4, 5)
+wavefunction.rx(3.2421712254591055, 0)
+wavefunction.rx(3.2421712254591055, 1)
+wavefunction.rx(3.2421712254591055, 4)
+wavefunction.rx(3.2421712254591055, 5)
+wavefunction.rx(3.7820897093979484, 2)
+wavefunction.rx(3.7820897093979484, 3)
+
+
+wavefunction.rzz(2.8588355186704986, 0, 2)
+wavefunction.rzz(2.8588355186704986, 1, 3)
+wavefunction.rzz(-5.008420640736318, 2, 4)
+wavefunction.rzz(-5.008420640736318, 3, 5)
+wavefunction.rzz(-2.9662902017355477, 0, 1)
+wavefunction.rzz(2.9208344623450135, 2, 3)
+wavefunction.rzz(-4.7325429954577, 4, 5)
+wavefunction.rx(-1.517545750198852, 0)                
+wavefunction.rx(-1.517545750198852, 1)
+wavefunction.rx(-1.517545750198852, 4)
+wavefunction.rx(-1.517545750198852, 5)
+wavefunction.rx(-1.031102475084445, 2)
+wavefunction.rx(-1.031102475084445, 3)
+
+
+wavefunction.rzz(6.167042920190077, 0, 2)
+wavefunction.rzz(6.167042920190077, 1, 3)
+wavefunction.rzz(-6.50733538269312, 2, 4)
+wavefunction.rzz(-6.50733538269312, 3, 5)
+wavefunction.rzz(0.31612030439802147, 0, 1)
+wavefunction.rzz(1.163106087088543, 2, 3)
+wavefunction.rzz(6.727134694984195, 4, 5)
+wavefunction.rx(-2.945575302271674, 0)
+wavefunction.rx(-2.945575302271674, 1)
+wavefunction.rx(-2.945575302271674, 4)
+wavefunction.rx(-2.945575302271674, 5)
+wavefunction.rx(2.6881926475764915, 2)
+wavefunction.rx(2.6881926475764915, 3)
+
+wavefunction.rzz(params[0], 0, 2)
+wavefunction.rzz(params[0], 1, 3)
+wavefunction.rzz(params[1], 2, 4)
+wavefunction.rzz(params[1], 3, 5)
+wavefunction.rzz(params[2], 0, 1)
+wavefunction.rzz(params[3], 2, 3)
+wavefunction.rzz(params[4], 4, 5)
+wavefunction.rx(params[5], 0)
+wavefunction.rx(params[5], 1)
+wavefunction.rx(params[5], 4)
+wavefunction.rx(params[5], 5)
+wavefunction.rx(params[6], 2)
+wavefunction.rx(params[6], 3)
+
+vqe.var_form = wavefunction
+vqe = VQE(operator=hamiltonian, optimizer=optimizer,quantum_instance=backend)
+result = vqe.compute_minimum_eigenvalue()
+print('VQE:', result.eigenvalue.real)
